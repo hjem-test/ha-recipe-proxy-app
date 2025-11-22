@@ -37,11 +37,18 @@ server {
                 local ingress_path = "{{ .entry }}"
                 local chunk = ngx.arg[1]
                 if chunk then
-                    -- Inject base tag after <head>
-                    chunk = string.gsub(chunk, "<head>", '<head><base href="' .. ingress_path .. '/">')
-                    chunk = string.gsub(chunk, "<HEAD>", '<HEAD><base href="' .. ingress_path .. '/">')
+                    -- Replace existing Angular base href with ingress path
+                    chunk = string.gsub(chunk, '<base href="/">', '<base href="' .. ingress_path .. '/">')
+                    chunk = string.gsub(chunk, "<base href='/'>", "<base href='" .. ingress_path .. "/'>")
+                    chunk = string.gsub(chunk, '<base href="">', '<base href="' .. ingress_path .. '/">')
 
-                    -- Also rewrite absolute paths just in case
+                    -- If no base tag exists, inject one
+                    if not string.find(chunk, "<base") then
+                        chunk = string.gsub(chunk, "<head>", '<head><base href="' .. ingress_path .. '/">')
+                        chunk = string.gsub(chunk, "<HEAD>", '<HEAD><base href="' .. ingress_path .. '/">')
+                    end
+
+                    -- Rewrite absolute paths in script and link tags
                     chunk = string.gsub(chunk, 'src="/', 'src="' .. ingress_path .. '/')
                     chunk = string.gsub(chunk, 'href="/', 'href="' .. ingress_path .. '/')
                     chunk = string.gsub(chunk, "src='/", "src='" .. ingress_path .. "/")
