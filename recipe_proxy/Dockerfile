@@ -4,6 +4,7 @@ FROM ${BUILD_FROM}
 # Setup base
 RUN apk add --no-cache \
         nginx \
+        nginx-mod-devel-kit \
         nginx-mod-http-lua
 
 # Copy root filesystem
