@@ -8,7 +8,7 @@ server {
 
     location / {
         # Proxy to backend
-        proxy_pass {{ .server }}/;
+        proxy_pass {{ .server }};
 
         # Set headers
         proxy_set_header X-Ingress-Path {{ .entry }};
