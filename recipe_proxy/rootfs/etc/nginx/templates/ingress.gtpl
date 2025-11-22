@@ -23,7 +23,12 @@ server {
         # Disable compression so rewriting works
         proxy_set_header Accept-Encoding "";
 
-        # Use Lua to rewrite HTML responses with base tag
+        # Buffer the entire response so Lua can process it completely
+        proxy_buffering on;
+        proxy_buffer_size 128k;
+        proxy_buffers 8 128k;
+
+        # Use Lua to rewrite HTML responses
         header_filter_by_lua_block {
             local content_type = ngx.header["Content-Type"]
             if content_type and string.find(content_type, "text/html") then
@@ -35,26 +40,40 @@ server {
             local content_type = ngx.header["Content-Type"]
             if content_type and string.find(content_type, "text/html") then
                 local ingress_path = "{{ .entry }}"
-                local chunk = ngx.arg[1]
-                if chunk then
+
+                -- Buffer the entire response body
+                if not ngx.ctx.buffered then
+                    ngx.ctx.buffered = ""
+                end
+
+                if ngx.arg[1] then
+                    ngx.ctx.buffered = ngx.ctx.buffered .. ngx.arg[1]
+                    ngx.arg[1] = nil
+                end
+
+                -- Process when we have the complete response
+                if ngx.arg[2] then
+                    local body = ngx.ctx.buffered
+
                     -- Replace existing Angular base href with ingress path
-                    chunk = string.gsub(chunk, '<base href="/">', '<base href="' .. ingress_path .. '/">')
-                    chunk = string.gsub(chunk, "<base href='/'>", "<base href='" .. ingress_path .. "/'>")
-                    chunk = string.gsub(chunk, '<base href="">', '<base href="' .. ingress_path .. '/">')
+                    body = string.gsub(body, '<base href="/">', '<base href="' .. ingress_path .. '/">')
+                    body = string.gsub(body, "<base href='/'>", "<base href='" .. ingress_path .. "/'>")
+                    body = string.gsub(body, '<base href="">', '<base href="' .. ingress_path .. '/">')
 
                     -- If no base tag exists, inject one
-                    if not string.find(chunk, "<base") then
-                        chunk = string.gsub(chunk, "<head>", '<head><base href="' .. ingress_path .. '/">')
-                        chunk = string.gsub(chunk, "<HEAD>", '<HEAD><base href="' .. ingress_path .. '/">')
+                    if not string.find(body, "<base") then
+                        body = string.gsub(body, "<head>", '<head><base href="' .. ingress_path .. '/">')
+                        body = string.gsub(body, "<HEAD>", '<HEAD><base href="' .. ingress_path .. '/">')
                     end
 
                     -- Rewrite absolute paths in script and link tags
-                    chunk = string.gsub(chunk, 'src="/', 'src="' .. ingress_path .. '/')
-                    chunk = string.gsub(chunk, 'href="/', 'href="' .. ingress_path .. '/')
-                    chunk = string.gsub(chunk, "src='/", "src='" .. ingress_path .. "/")
-                    chunk = string.gsub(chunk, "href='/", "href='" .. ingress_path .. "/")
+                    body = string.gsub(body, 'src="/', 'src="' .. ingress_path .. '/')
+                    body = string.gsub(body, 'href="/', 'href="' .. ingress_path .. '/')
+                    body = string.gsub(body, "src='/", "src='" .. ingress_path .. "/")
+                    body = string.gsub(body, "href='/", "href='" .. ingress_path .. "/")
 
-                    ngx.arg[1] = chunk
+                    ngx.arg[1] = body
+                    ngx.arg[2] = true
                 end
             end
         }
