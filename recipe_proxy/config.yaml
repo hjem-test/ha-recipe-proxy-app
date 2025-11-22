@@ -20,10 +20,12 @@ ingress_port: 5000
 panel_icon: mdi:food
 panel_title: Recipes
 options:
-  server: "http://recipe-app.local:8080"
+  frontend_server: "http://192.168.0.175:4200"
+  backend_server: "http://192.168.0.175:5000"
   proxy_pass_host: true
   proxy_pass_real_ip: true
 schema:
-  server: url
+  frontend_server: url
+  backend_server: url
   proxy_pass_host: bool
   proxy_pass_real_ip: bool

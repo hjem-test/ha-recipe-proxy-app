@@ -6,9 +6,28 @@ server {
     allow   172.30.32.2;
     deny    all;
 
+    # Proxy API requests to backend server
+    location /api/ {
+        # Proxy to backend API server
+        proxy_pass {{ .backend_server }};
+
+        # Set headers
+        proxy_set_header X-Ingress-Path {{ .entry }};
+        {{ if .proxy_pass_host }}
+        proxy_set_header Host $http_host;
+        {{ end }}
+        {{ if .proxy_pass_real_ip }}
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+        {{ end }}
+
+        include /etc/nginx/includes/proxy_params.conf;
+    }
+
+    # Proxy everything else to frontend server
     location / {
-        # Proxy to backend
-        proxy_pass {{ .server }};
+        # Proxy to frontend server
+        proxy_pass {{ .frontend_server }};
 
         # Set headers
         proxy_set_header X-Ingress-Path {{ .entry }};
@@ -42,10 +61,6 @@ server {
         sub_filter 'href="/' 'href="{{ .entry }}/';
         sub_filter "src='/" "src='{{ .entry }}/";
         sub_filter "href='/" "href='{{ .entry }}/";
-
-        # Rewrite hardcoded backend URLs to use ingress path
-        sub_filter 'http://192.168.0.175:5000/' '{{ .entry }}/';
-        sub_filter 'http://192.168.0.175:4200/' '{{ .entry }}/';
 
         # Rewrite absolute URLs to relative URLs in JavaScript (base href will resolve them)
         # This prevents double ingress path when Angular HTTP client uses base href

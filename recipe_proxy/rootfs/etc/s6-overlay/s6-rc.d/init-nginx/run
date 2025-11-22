@@ -5,23 +5,27 @@
 # ==============================================================================
 
 declare entry
-declare server
+declare frontend_server
+declare backend_server
 declare proxy_pass_host
 
 entry=$(bashio::addon.ingress_entry)
-server=$(bashio::config 'server')
+frontend_server=$(bashio::config 'frontend_server')
+backend_server=$(bashio::config 'backend_server')
 # The caret stops bashio:var.json from passing the value as a string
 proxy_pass_host=^$(bashio::config 'proxy_pass_host')
 proxy_pass_real_ip=^$(bashio::config 'proxy_pass_real_ip')
 
 bashio::log.info "Ingress entry: ${entry}"
-bashio::log.info "Backend server: ${server}"
+bashio::log.info "Frontend server: ${frontend_server}"
+bashio::log.info "Backend server: ${backend_server}"
 bashio::log.info "Proxy pass host: ${proxy_pass_host}"
 bashio::log.info "Proxy pass real IP: ${proxy_pass_real_ip}"
 
 bashio::var.json \
     entry "${entry}" \
-    server "${server}" \
+    frontend_server "${frontend_server}" \
+    backend_server "${backend_server}" \
     proxy_pass_host "${proxy_pass_host}" \
     proxy_pass_real_ip "${proxy_pass_real_ip}" \
     | tempio \

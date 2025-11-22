@@ -22,11 +22,19 @@ This add-on creates a proxy to a recipe application server run separately from H
 
 ## Configuration
 
-**server:** The URL of your recipe application server (e.g., `http://recipe-app.local:8080` or `https://192.168.1.100:8080`)
+**frontend_server:** The URL of your frontend application server (e.g., `http://192.168.0.175:4200`)
 
-**proxy_pass_host:** Forward the Home Assistant hostname to your recipe application. Set to `false` if your recipe application is behind an SSL proxy like Traefik or Caddy. (Default: `true`)
+**backend_server:** The URL of your backend API server (e.g., `http://192.168.0.175:5000`)
 
-**proxy_pass_real_ip:** Forward the client's real IP address to your recipe application. Set to `false` if your recipe application restricts access based on IP addresses through an upstream proxy. (Default: `true`)
+**proxy_pass_host:** Forward the Home Assistant hostname to your application servers. Set to `false` if your application is behind an SSL proxy like Traefik or Caddy. (Default: `true`)
+
+**proxy_pass_real_ip:** Forward the client's real IP address to your application servers. Set to `false` if your application restricts access based on IP addresses through an upstream proxy. (Default: `true`)
+
+### How It Works
+
+The proxy automatically routes requests to the appropriate server:
+- `/api/*` requests are proxied to the **backend_server**
+- All other requests (frontend assets, HTML, etc.) are proxied to the **frontend_server**
 
 ## Support
 
