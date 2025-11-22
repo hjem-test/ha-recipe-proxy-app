@@ -43,9 +43,9 @@ server {
         sub_filter "src='/" "src='{{ .entry }}/";
         sub_filter "href='/" "href='{{ .entry }}/";
 
-        # Rewrite hardcoded backend URLs in HTML/JS to use relative paths
-        sub_filter 'http://192.168.0.175:5000/' '/';
-        sub_filter 'http://192.168.0.175:4200/' '/';
+        # Rewrite hardcoded backend URLs to use ingress path
+        sub_filter 'http://192.168.0.175:5000/' '{{ .entry }}/';
+        sub_filter 'http://192.168.0.175:4200/' '{{ .entry }}/';
 
         include /etc/nginx/includes/proxy_params.conf;
     }
