@@ -1,11 +1,10 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base:7.8.2
+ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 # Setup base
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
         nginx \
-    && rm -rf /var/lib/apt/lists/*
+        nginx-mod-http-lua
 
 # Copy root filesystem
 COPY rootfs /
