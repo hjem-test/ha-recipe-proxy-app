@@ -1,5 +1,5 @@
 name: Recipe Proxy
-version: "1.0.0"
+version: "1.0.1"
 slug: recipe-proxy
 description: Proxy to a local recipe application
 url: https://github.com/Ephis/ha-recipe-proxy-app
