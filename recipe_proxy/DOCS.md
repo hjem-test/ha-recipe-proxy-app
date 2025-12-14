@@ -35,13 +35,36 @@ Set this to `false` if your recipe application restricts access based on specifi
 
 ## Fullscreen Mode (Hiding Home Assistant Header)
 
-By default, the add-on displays within Home Assistant's interface, which includes the sidebar and header navigation. If you want a fullscreen experience without the Home Assistant header, you have the following options:
+By default, the add-on displays within Home Assistant's interface, which includes the sidebar and header navigation. The ingress system doesn't provide a built-in way to hide the header. If you want a fullscreen experience without the Home Assistant header, you have the following options:
 
-1. **Kiosk Mode HACS Integration** - Install the [kiosk-mode](https://github.com/NemesisRE/kiosk-mode) integration from HACS to hide the header and sidebar for specific users or panels.
+### Recommended: hass_ingress Integration
 
-2. **Browser Kiosk Mode** - Access Home Assistant in your browser's kiosk or fullscreen mode (F11 in most browsers).
+Install the [hass_ingress](https://github.com/lovelylain/hass_ingress) integration from HACS, which provides a `ui_mode` option to hide the header:
 
-3. **Direct Access** - If your recipe application is accessible on your network, you can access it directly without going through Home Assistant's ingress.
+1. Install [HACS](https://hacs.xyz/) if you haven't already
+2. In HACS, add the custom repository: `https://github.com/lovelylain/hass_ingress`
+3. Install the integration and restart Home Assistant
+4. Add to your `configuration.yaml`:
+
+```yaml
+ingress:
+  recipes:
+    work_mode: hassio
+    url: recipe-proxy
+    ui_mode: replace
+    title: Recipes
+    icon: mdi:food
+```
+
+The `ui_mode: replace` setting hides the Home Assistant header.
+
+### Alternative Options
+
+1. **Kiosk Mode HACS Integration** - Install the [kiosk-mode](https://github.com/NemesisRE/kiosk-mode) integration to hide the header and sidebar.
+
+2. **Browser Kiosk Mode** - Press F11 in your browser for fullscreen mode.
+
+3. **Direct Access** - Access your recipe app directly at its URL (e.g., `http://192.168.0.175:4200`) instead of through Home Assistant.
 
 ## Requirements
 
