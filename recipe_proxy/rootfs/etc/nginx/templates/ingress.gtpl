@@ -80,8 +80,15 @@ server {
         sub_filter "src='/" "src='{{ .entry }}/";
         sub_filter "href='/" "href='{{ .entry }}/";
 
-        # Rewrite absolute URLs to relative URLs in JavaScript (base href will resolve them)
-        # This prevents double ingress path when Angular HTTP client uses base href
+        # STEP 1: Protect URLs that already have the full ingress path
+        # These should remain absolute to avoid double-path issues
+        # Use a placeholder that won't appear in normal code
+        sub_filter '"{{ .entry }}' '"__INGRESS_ENTRY_PLACEHOLDER__';
+        sub_filter "'{{ .entry }}" "'__INGRESS_ENTRY_PLACEHOLDER__";
+        sub_filter '`{{ .entry }}' '`__INGRESS_ENTRY_PLACEHOLDER__';
+
+        # STEP 2: Convert simple absolute URLs to relative URLs in JavaScript
+        # (base href will resolve them correctly)
         sub_filter '"/version.json"' '"version.json"';
         sub_filter "'/version.json'" "'version.json'";
         sub_filter '"/assets/' '"assets/';
@@ -91,6 +98,11 @@ server {
         sub_filter '`/api/' '`api/';
         sub_filter '`/assets/' '`assets/';
         sub_filter '`/version.json' '`version.json';
+
+        # STEP 3: Restore the protected ingress URLs back to absolute paths
+        sub_filter '"__INGRESS_ENTRY_PLACEHOLDER__' '"{{ .entry }}';
+        sub_filter "'__INGRESS_ENTRY_PLACEHOLDER__" "'{{ .entry }}";
+        sub_filter '`__INGRESS_ENTRY_PLACEHOLDER__' '`{{ .entry }}';
 
         # Rewrite absolute backend/frontend server URLs to ingress path
         # This fixes Mixed Content errors when frontend contains hardcoded URLs
