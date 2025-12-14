@@ -21,6 +21,24 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         {{ end }}
 
+        # Disable compression for sub_filter to work
+        proxy_set_header Accept-Encoding "";
+
+        # Buffer the response
+        proxy_buffering on;
+        proxy_buffer_size 128k;
+        proxy_buffers 8 128k;
+
+        # Rewrite absolute backend URLs in JSON responses to use ingress path
+        sub_filter_types application/json;
+        sub_filter_once off;
+        sub_filter_last_modified off;
+
+        # Replace absolute backend URLs with ingress-relative URLs
+        # This fixes Mixed Content errors when accessing via HTTPS ingress
+        sub_filter '{{ .backend_server }}/' '{{ .entry }}/';
+        sub_filter '{{ .backend_server }}' '{{ .entry }}';
+
         include /etc/nginx/includes/proxy_params.conf;
     }
 
