@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-10-17
+
+### Fixed
+- The recipe app could stay on Home Assistant's loading screen, or keep running an old version. Its service worker cannot work through the proxy (the rewritten pages and scripts never match their hashes), so `ngsw-worker.js` is now answered with Angular's safety worker, which removes the service worker and its caches
+
 ## [1.0.3] - 2025-12-14
 
 ### Changed

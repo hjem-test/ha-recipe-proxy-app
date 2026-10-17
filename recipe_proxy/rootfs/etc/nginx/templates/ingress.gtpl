@@ -6,6 +6,22 @@ server {
     allow   172.30.32.2;
     deny    all;
 
+    # The app's service worker cannot work through this proxy: the sub_filter rules below rewrite
+    # index.html and the scripts, so they never match the hashes in ngsw.json. The worker then
+    # cannot install new versions, keeps serving an old app and can hold requests, leaving the
+    # panel on Home Assistant's loading screen. Serve Angular's safety worker instead: browsers
+    # that already have the worker install it, and it unregisters itself and clears the caches.
+    location = /ngsw-worker.js {
+        proxy_pass {{ .frontend_server }}/safety-worker.js;
+
+        # Browsers must pick up the replacement on their next update check
+        proxy_hide_header Cache-Control;
+        proxy_hide_header Expires;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+
+        include /etc/nginx/includes/proxy_params.conf;
+    }
+
     # Proxy API requests to backend server
     # Use regex location to handle doubled ingress path issue
     location ~ ^/api/ {
