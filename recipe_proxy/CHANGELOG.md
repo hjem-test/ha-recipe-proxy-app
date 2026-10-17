@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.7] - 2026-10-17
+
+### Fixed
+- Updating failed with "base name (${BUILD_FROM}) should not be blank": newer Supervisor versions no longer pass `BUILD_FROM`, so the Dockerfile now defaults to Home Assistant's base image for the architecture being built
+
 ## [1.0.6] - 2026-10-17
 
 ### Fixed
