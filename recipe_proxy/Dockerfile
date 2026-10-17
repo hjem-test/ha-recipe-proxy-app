@@ -1,4 +1,7 @@
-ARG BUILD_FROM
+# Newer Supervisor versions only pass BUILD_ARCH (and BUILD_VERSION), not BUILD_FROM,
+# so default to Home Assistant's base image for the architecture being built
+ARG BUILD_ARCH=amd64
+ARG BUILD_FROM=ghcr.io/home-assistant/${BUILD_ARCH}-base:latest
 FROM ${BUILD_FROM}
 
 # Setup base
