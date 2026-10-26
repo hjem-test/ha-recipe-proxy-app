@@ -6,16 +6,33 @@ This add-on creates a proxy to a recipe application server running separately fr
 
 ## Options
 
-### Option: `server`
+### Option: `frontend_server`
 
-The URL of your recipe application server. This should include the protocol (http or https), hostname or IP address, and port number.
+The URL of your recipe application's frontend server. This should include the protocol (http or https), hostname or IP address, and port number. Everything except `/api/` requests is proxied here.
 
 **Format:** `http[s]://host:port`
 
 **Examples:**
+- `http://192.168.0.175:4200`
 - `http://recipe-app.local:8080`
-- `http://192.168.1.100:8080`
+
+### Option: `backend_server`
+
+The URL of your recipe application's backend API server, in the same format. All `/api/` requests are proxied here.
+
+**Examples:**
+- `http://192.168.0.175:5000`
 - `https://192.168.1.100:443`
+
+### Option: `api_key`
+
+An API key from the recipe app, so you do not have to log in inside Home Assistant. An admin makes the key in the recipe app under **Admin → API keys** and chooses which user it logs in as; the key is shown only once, so copy it then. It starts with `rak_`.
+
+With a key set, the proxy adds it to every API request and the app logs itself in as the key's user when it opens in Home Assistant. Everyone who can open the Recipes panel in Home Assistant then uses that account, so pick the user accordingly. If you log out inside Home Assistant, you can log in as another user; **Log in with Home Assistant** on the login page uses the key again, and so does a new browser tab.
+
+Leave it empty to log in with a username and password as before. Deleting the key in the app ends the sessions it started.
+
+**Default:** empty
 
 ### Option: `proxy_pass_host`
 

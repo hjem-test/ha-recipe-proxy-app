@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.8] - 2026-10-26
+
+### Added
+- `api_key` option: an API key made in the recipe app (Admin → API keys) is sent to the backend as the `X-Api-Key` header, so the app logs itself in inside Home Assistant as the key's user. Without a key, an `X-Api-Key` header sent by the browser is removed
+
 ## [1.0.7] - 2026-10-17
 
 ### Fixed

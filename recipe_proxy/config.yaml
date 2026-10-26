@@ -1,5 +1,5 @@
 name: Recipe Proxy
-version: "1.0.7"
+version: "1.0.8"
 slug: recipe-proxy
 description: Proxy to a local recipe application
 url: https://github.com/Ephis/ha-recipe-proxy-app
@@ -24,8 +24,10 @@ options:
   backend_server: "http://192.168.0.175:5000"
   proxy_pass_host: true
   proxy_pass_real_ip: true
+  api_key: ""
 schema:
   frontend_server: url
   backend_server: url
   proxy_pass_host: bool
   proxy_pass_real_ip: bool
+  api_key: password?
