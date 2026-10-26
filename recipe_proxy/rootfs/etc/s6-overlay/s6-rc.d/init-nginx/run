@@ -8,6 +8,7 @@ declare entry
 declare frontend_server
 declare backend_server
 declare proxy_pass_host
+declare api_key=""
 
 entry=$(bashio::addon.ingress_entry)
 frontend_server=$(bashio::config 'frontend_server')
@@ -16,11 +17,26 @@ backend_server=$(bashio::config 'backend_server')
 proxy_pass_host=^$(bashio::config 'proxy_pass_host')
 proxy_pass_real_ip=^$(bashio::config 'proxy_pass_real_ip')
 
+# The API key is a secret: never log it
+if bashio::config.has_value 'api_key'; then
+    api_key=$(bashio::config 'api_key')
+    # Keys are "rak_" plus base64url. Anything else (a quote, a $, a space from pasting)
+    # would break or change the nginx config, and the redaction below relies on it.
+    if [[ ! "${api_key}" =~ ^[A-Za-z0-9_-]+$ ]]; then
+        bashio::exit.nok "The API key may only contain letters, digits, _ and -. Copy it again from Admin → API keys in the recipe app."
+    fi
+fi
+
 bashio::log.info "Ingress entry: ${entry}"
 bashio::log.info "Frontend server: ${frontend_server}"
 bashio::log.info "Backend server: ${backend_server}"
 bashio::log.info "Proxy pass host: ${proxy_pass_host}"
 bashio::log.info "Proxy pass real IP: ${proxy_pass_real_ip}"
+if bashio::var.has_value "${api_key}"; then
+    bashio::log.info "API key: set"
+else
+    bashio::log.info "API key: not set"
+fi
 
 bashio::var.json \
     entry "${entry}" \
@@ -28,9 +44,10 @@ bashio::var.json \
     backend_server "${backend_server}" \
     proxy_pass_host "${proxy_pass_host}" \
     proxy_pass_real_ip "${proxy_pass_real_ip}" \
+    api_key "${api_key}" \
     | tempio \
         -template /etc/nginx/templates/ingress.gtpl \
         -out /etc/nginx/servers/ingress.conf
 
-bashio::log.info "Generated nginx configuration:"
-cat /etc/nginx/servers/ingress.conf
+bashio::log.info "Generated nginx configuration (API key redacted):"
+sed 's/X-Api-Key "[^"][^"]*"/X-Api-Key "<redacted>"/' /etc/nginx/servers/ingress.conf

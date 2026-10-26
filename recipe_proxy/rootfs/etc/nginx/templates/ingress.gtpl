@@ -43,6 +43,14 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         {{ end }}
 
+        # The app logs itself in with this key (POST /api/auth/api-key). Without a key, an empty
+        # value removes any X-Api-Key header sent by the browser.
+        {{ if .api_key }}
+        proxy_set_header X-Api-Key "{{ .api_key }}";
+        {{ else }}
+        proxy_set_header X-Api-Key "";
+        {{ end }}
+
         # Disable compression for sub_filter to work
         proxy_set_header Accept-Encoding "";
 
